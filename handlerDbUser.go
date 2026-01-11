@@ -39,6 +39,6 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 		UpdatedAt: newUser.UpdatedAt,
 		Email:     newUser.Email,
 	}
-	respondWithJSON(w, 201, u)
+	respondWithJSON(w, http.StatusCreated, u)
 	log.Printf("New User created with email: %s", u.Email)
 }
