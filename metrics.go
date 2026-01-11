@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -18,11 +19,18 @@ func (cfg *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		cfg.fileserverHits.Load())))
 }
 
-func (cfg *apiConfig) handleResetMetrics(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
+	if cfg.platform != "dev" {
+		respondWithError(w, http.StatusForbidden, "Forbidden", fmt.Errorf("Forbidden"))
+	}
+	err := cfg.db.DeleteAllUsers(context.Background())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error when deleting database", err)
+	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	cfg.fileserverHits.Store(0)
-	message := []byte("Hits reset")
+	message := []byte("Hits and Database reset")
 	w.Write(message)
 }
 
