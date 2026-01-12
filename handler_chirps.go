@@ -47,7 +47,7 @@ func (cfg *apiConfig) handleCreateChirp(w http.ResponseWriter, r *http.Request) 
 	}
 	chirpDB, err := cfg.db.CreateChirp(context.Background(), dbEntry)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error creatign user in databs", err)
+		respondWithError(w, http.StatusInternalServerError, "error creatign chirp in database", err)
 		return
 	}
 	c := Chirp{
@@ -98,4 +98,45 @@ func badWordCheck(word string) string {
 
 	}
 	return word
+}
+
+func (cfg *apiConfig) handleGetChirps(w http.ResponseWriter, r *http.Request) {
+	chirpDB, err := cfg.db.GetChirps(context.Background())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error getting chirps from database.", err)
+		return
+	}
+	Result := []Chirp{}
+	for _, c := range chirpDB {
+		conversion := Chirp{
+			ID:        c.ID,
+			CreatedAt: c.CreatedAt,
+			UpdatedAt: c.UpdatedAt,
+			Body:      c.Body,
+			User_id:   c.UserID,
+		}
+		Result = append(Result, conversion)
+	}
+	respondWithJSON(w, http.StatusOK, Result)
+}
+
+func (cfg *apiConfig) handleGetChirpByID(w http.ResponseWriter, r *http.Request) {
+	chirpID, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Not a Valid ID", err)
+		return
+	}
+	c, err := cfg.db.GetChirpByID(context.Background(), uuid.UUID(chirpID))
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Chirp not found", err)
+		return
+	}
+	conversion := Chirp{
+		ID:        c.ID,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
+		Body:      c.Body,
+		User_id:   c.UserID,
+	}
+	respondWithJSON(w, http.StatusOK, conversion)
 }
