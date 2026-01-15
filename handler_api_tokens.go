@@ -3,36 +3,57 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/jcfullmer/chirpy/internal/auth"
 )
 
-func (cfg *apiConfig) handlerReresh(w http.ResponseWriter, req *http.Request) {
-	type parameters struct {
-		token string `json:"token"`
-	}
-	decoder := json.NewDecoder(req.Body)
-	params := parameters{}
-	err := decoder.Decode(&params)
+func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, req *http.Request) {
+	token, err := auth.GetBearerToken(req.Header)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't get token from auth header", err)
 		return
 	}
+	tokenDB, err := cfg.db.RefreshTokenLookup(context.Background(), token)
+	if err == sql.ErrNoRows {
+		respondWithError(w, http.StatusUnauthorized, "Token not found", err)
+		return
+	} else if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "error checking database for refresh token", err)
+		return
+	}
+	if tokenDB.ExpiresAt.Before(time.Now().UTC()) {
+		respondWithError(w, http.StatusUnauthorized, "token expired", err)
+		return
+	}
+	if tokenDB.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized, "invalid token", err)
+		return
+	}
+	newToken, err := auth.MakeJWT(tokenDB.UserID, cfg.JWTSecret)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error creating new token", err)
+		return
+	}
+	type tokenStruct struct {
+		Token string `json:"token"`
+	}
+	newtokenS := tokenStruct{
+		Token: newToken,
+	}
+	respondWithJSON(w, http.StatusOK, newtokenS)
+}
+
+func (cfg *apiConfig) handlerRevoke(w http.ResponseWriter, req *http.Request) {
 	token, err := auth.GetBearerToken(req.Header)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get token from auth header", err)
 	}
-	expires_at, err := cfg.db.RefreshTokenLookup(context.Background(), token)
-	if err == sql.ErrNoRows {
-		respondWithError(w, http.StatusUnauthorized, "Token not found", err)
-	} else if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "error checking databse for refresh token", err)
+	err = cfg.db.RevokeToken(context.Background(), token)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error revoking token", err)
 	}
-	if expires_at.Before(time.Now().UTC()) {
-		respondWithError(w, http.StatusUnauthorized, "token expired", err)
-	}
-	respondWithJSON(w, http.StatusOK, token)
+	w.WriteHeader(http.StatusNoContent)
+
 }

@@ -85,10 +85,12 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 		token, err := auth.MakeJWT(u.ID, cfg.JWTSecret)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Error creating token", err)
+			return
 		}
 		refreshToken, err := auth.MakeRefreshToken()
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Error creating refresh token", err)
+			return
 		}
 		refreshTokenParams := database.CreateRefreshTokenParams{
 			Token:  refreshToken,
@@ -97,6 +99,7 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 		refreshTokenDB, err := cfg.db.CreateRefreshToken(context.Background(), refreshTokenParams)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Error adding refresh token to database", err)
+			return
 		}
 		user := User{
 			ID:           u.ID,
