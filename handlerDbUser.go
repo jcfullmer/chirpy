@@ -13,10 +13,12 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	Email        string    `json:"email"`
+	Token        string    `json:"token"`
+	RefreshToken string    `json:"refresh_token"`
 }
 
 func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request) {
@@ -57,12 +59,16 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 
 func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 	type parameters struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email            string        `json:"email"`
+		Password         string        `json:"password"`
+		ExpiresInSeconds time.Duration `json:"expires_in_seconds"`
 	}
 
 	decoder := json.NewDecoder(req.Body)
-	params := parameters{}
+	params := parameters{
+		Email:    "",
+		Password: "",
+	}
 	err := decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
@@ -76,13 +82,32 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 	loginBool, err := auth.CheckPasswordHash(params.Password, u.HashedPassword)
 	switch loginBool {
 	case true:
+		token, err := auth.MakeJWT(u.ID, cfg.JWTSecret)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error creating token", err)
+		}
+		refreshToken, err := auth.MakeRefreshToken()
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error creating refresh token", err)
+		}
+		refreshTokenParams := database.CreateRefreshTokenParams{
+			Token:  refreshToken,
+			UserID: u.ID,
+		}
+		refreshTokenDB, err := cfg.db.CreateRefreshToken(context.Background(), refreshTokenParams)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error adding refresh token to database", err)
+		}
 		user := User{
-			ID:        u.ID,
-			CreatedAt: u.CreatedAt,
-			UpdatedAt: u.UpdatedAt,
-			Email:     u.Email,
+			ID:           u.ID,
+			CreatedAt:    u.CreatedAt,
+			UpdatedAt:    u.UpdatedAt,
+			Email:        u.Email,
+			Token:        token,
+			RefreshToken: refreshTokenDB,
 		}
 		respondWithJSON(w, http.StatusOK, user)
+		log.Printf("Logged in user %s", user.Email)
 	default:
 		respondWithError(w, http.StatusUnauthorized, "incorrect email or password", err)
 	}
