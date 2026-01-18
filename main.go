@@ -18,6 +18,7 @@ type apiConfig struct {
 	db             *database.Queries
 	platform       string
 	JWTSecret      string
+	PolkaKey       string
 }
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 		db:             dbQueries,
 		platform:       os.Getenv("PLATFORM"),
 		JWTSecret:      os.Getenv("JWT_SECRET"),
+		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/app/", apiCfg.middlewareMetricInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
