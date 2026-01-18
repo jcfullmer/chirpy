@@ -1,0 +1,125 @@
+
+
+Sat Jan 17 13:47:35 2026
+Command line: TestDisk
+
+TestDisk 7.2, Data Recovery Utility, February 2024
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 6.18.5-200.fc43.x86_64 (#1 SMP PREEMPT_DYNAMIC Sun Jan 11 17:09:32 UTC 2026) x86_64
+Compiler: GCC 15.1
+ext2fs lib: 1.47.3, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: 20140608, curses lib: ncurses 6.5
+/dev/sda: LBA, HPA, LBA48, DCO support
+/dev/sda: size       937703088 sectors
+/dev/sda: user_max   937703088 sectors
+/dev/sda: native_max 937703088 sectors
+/dev/sda: dco        937703088 sectors
+Warning: can't get size for Disk /dev/mapper/control - 0 B - 0 sectors, sector size=512
+Hard disk list
+Disk /dev/sda - 480 GB / 447 GiB - CHS 58369 255 63, sector size=512 - OWC Mercury EXTR, FW:5C
+Disk /dev/sdc - 62 GB / 58 GiB - CHS 60000 64 32, sector size=512 - Flash Disk, FW:8.01
+
+Partition table type (auto): Intel
+Disk /dev/sdc - 62 GB / 58 GiB - Flash Disk
+Partition table type: Intel
+
+Analyse Disk /dev/sdc - 62 GB / 58 GiB - CHS 60000 64 32
+Geometry from i386 MBR: head=255 sector=63
+BAD_RS LBA=2048 1056
+FAT32 at 1/0/1
+Info: size boot_sector 67108864, partition 67108864
+FAT1 : 8196-16385
+FAT2 : 16386-24575
+start_rootdir : 24576 root cluster : 2
+Data : 24576-67108863
+sectors : 67108864
+cluster_size : 64
+no_of_cluster : 1048192 (2 - 1048193)
+fat_length 8190 calculated 8190
+heads/cylinder 255 (FAT) != 64 (HD)
+sect/track 63 (FAT) != 32 (HD)
+get_geometry_from_list_part_aux head=64 nbr=2
+get_geometry_from_list_part_aux head=8 nbr=2
+get_geometry_from_list_part_aux head=16 nbr=2
+get_geometry_from_list_part_aux head=32 nbr=2
+get_geometry_from_list_part_aux head=64 nbr=2
+Current partition structure:
+Warning: number of heads/cylinder mismatches 255 (FAT) != 64 (HD)
+Warning: number of sectors per track mismatches 63 (FAT) != 32 (HD)
+ 1 * FAT32 LBA                1   0  1 32768  63 32   67108864 [ESD-USB]
+
+Warning: Bad starting sector (CHS and LBA don't match)
+
+search_part()
+Disk /dev/sdc - 62 GB / 58 GiB - CHS 60000 64 32
+FAT32 at 1/0/1
+FAT1 : 8196-16385
+FAT2 : 16386-24575
+start_rootdir : 24576 root cluster : 2
+Data : 24576-67108863
+sectors : 67108864
+cluster_size : 64
+no_of_cluster : 1048192 (2 - 1048193)
+fat_length 8190 calculated 8190
+heads/cylinder 255 (FAT) != 64 (HD)
+sect/track 63 (FAT) != 32 (HD)
+
+FAT32 at 1/0/1
+FAT: cluster=2(0x2), pos=26624
+     FAT32 LBA                1   0  1 32768  63 32   67108864 [ESD-USB]
+     FAT32, blocksize=32768, 34 GB / 32 GiB
+Search for partition aborted
+get_geometry_from_list_part_aux head=64 nbr=2
+get_geometry_from_list_part_aux head=8 nbr=2
+get_geometry_from_list_part_aux head=16 nbr=2
+get_geometry_from_list_part_aux head=32 nbr=2
+get_geometry_from_list_part_aux head=64 nbr=2
+
+Results
+   * FAT32 LBA                1   0  1 32768  63 32   67108864 [ESD-USB]
+     FAT32, blocksize=32768, 34 GB / 32 GiB
+
+Hint for advanced users: dmsetup may be used if you prefer to avoid rewriting the partition table for the moment:
+echo "0 67108864 linear /dev/sdc 2048" | dmsetup create test0
+
+interface_write()
+ 1 * FAT32 LBA                1   0  1 32768  63 32   67108864 [ESD-USB]
+simulate write!
+
+write_mbr_i386: starting...
+write_all_log_i386: starting...
+No extended partition
+
+Interface Advanced
+Geometry from i386 MBR: head=255 sector=63
+BAD_RS LBA=2048 1056
+FAT32 at 1/0/1
+Info: size boot_sector 67108864, partition 67108864
+FAT1 : 8196-16385
+FAT2 : 16386-24575
+start_rootdir : 24576 root cluster : 2
+Data : 24576-67108863
+sectors : 67108864
+cluster_size : 64
+no_of_cluster : 1048192 (2 - 1048193)
+fat_length 8190 calculated 8190
+heads/cylinder 255 (FAT) != 64 (HD)
+sect/track 63 (FAT) != 32 (HD)
+get_geometry_from_list_part_aux head=64 nbr=2
+get_geometry_from_list_part_aux head=8 nbr=2
+get_geometry_from_list_part_aux head=16 nbr=2
+get_geometry_from_list_part_aux head=32 nbr=2
+get_geometry_from_list_part_aux head=64 nbr=2
+ 1 * FAT32 LBA                1   0  1 32768  63 32   67108864 [ESD-USB]
+     FAT32, blocksize=32768, 34 GB / 32 GiB
+
+FAT: cluster=2(0x2), pos=26624
+Directory /
+       3 drwxr-xr-x     0      0         0 16-Jan-2026 13:07 System Volume Information
+       6 -rwxr-xr-x     0      0    223505  7-Dec-2018 13:44 232-ATSC 4 Release Notes S228_HD644.pdf
+      13 -rwxr-xr-x     0      0   1842816  2-Apr-2018 09:03 232-ATSC4_PM_227.pdf
+      70 -rwxr-xr-x     0      0    509672  7-Dec-2018 09:58 ATSC_V2.28 update.s37
+      86 -rwxr-xr-x     0      0   6755856  9-May-2018 12:23 HD4_V644_CS2FAAD919.rom
+     293 -rwxr-xr-x     0      0   1198125 24-Mar-2021 11:00 232-ATSC 4_ATSC-SDI 4_ Firmware_Update_Instructions.pdf
+
+TestDisk exited normally.

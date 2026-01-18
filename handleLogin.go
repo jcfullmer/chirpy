@@ -62,6 +62,7 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 			Email:        u.Email,
 			Token:        token,
 			RefreshToken: refreshTokenDB,
+			IsChirpyRed:  u.IsChirpyRed.Bool,
 		}
 		respondWithJSON(w, http.StatusOK, user)
 		log.Printf("Logged in user %s", user.Email)
